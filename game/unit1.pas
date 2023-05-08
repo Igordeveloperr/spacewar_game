@@ -22,12 +22,24 @@ type
    widht, height:integer;
   end;
 
+  TBullet = class
+  public
+   img:TBitmap;
+   imgSrc:string;
+   x,y: integer;
+   widht, height:integer;
+   isVisable: boolean;
+   constructor Create(player: TPlayer);
+  end;
+
   { TGame }
 
   TGame = class(TForm)
     Timer1: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: char);
+    procedure FormMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
     procedure FormPaint(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -37,6 +49,8 @@ type
     procedure UpdateGame();
     procedure MoveLeft();
     procedure MoveRight();
+    procedure DrawEnemies();
+    procedure DrawBullets();
   public
 
   end;
@@ -55,7 +69,7 @@ type
 var
   Game: TGame;
   player: TPlayer;
-  enemies: TList;
+  enemies,bullets: TList;
 
 implementation
 
@@ -65,6 +79,13 @@ procedure TGame.FormKeyPress(Sender: TObject; var Key: char);
 begin
    if key in ['a'] then MoveLeft;
    if key in ['d'] then MoveRight;
+end;
+
+// механика стрельбы
+procedure TGame.FormMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  bullets.Add(TBullet.Create(player));
 end;
 
 // запрет на изменение размеров формы
@@ -81,6 +102,7 @@ end;
 procedure TGame.FormPaint(Sender: TObject);
 begin
   Frame();
+  UpdateGame();
 end;
 
 procedure TGame.FormShow(Sender: TObject);
@@ -100,6 +122,19 @@ begin
    widht := img.Width;
    isVisable := true;
    health := 100;
+end;
+
+//  конструктор пули
+constructor TBullet.Create(player: TPlayer);
+begin
+   img := TBitmap.Create;
+   imgSrc := 'assets\bullet.bmp';
+   img.LoadFromFile(imgSrc);
+   x := player.x + (player.widht div 2)-1;
+   y := player.y;
+   height := img.Height;
+   widht := img.Width;
+   isVisable := true;
 end;
 
 // переотрисовку в отдельный поток
@@ -127,6 +162,8 @@ end;
 // загрузка игрока и врагов
  procedure TGame.LoadSource();
  begin
+   bullets := TList.Create;
+
    player.img := TBitmap.Create;
    player.imgSrc := 'assets\Player.bmp';
    player.img.LoadFromFile(player.imgSrc);
@@ -141,25 +178,80 @@ end;
    enemies.Add(TBot.Create(800, 150, 'assets\bot.bmp'));
  end;
 
-// отрисовка игрока и врагов
+// отрисовка врагов
+procedure TGame.DrawEnemies();
+var i : integer;
+begin
+  for i := 0 to enemies.Count - 1 do begin
+      if TBot(enemies[i]).isVisable then begin
+        Canvas.Draw(
+          TBot(enemies[i]).x,
+          TBot(enemies[i]).y,
+          TBot(enemies[i]).img
+        );
+      end;
+    end;
+end;
+
+// отрисовка пуль
+procedure TGame.DrawBullets();
+var i : integer;
+begin
+  for i := 0 to bullets.Count - 1 do begin
+      if (TBullet(bullets[i]) <> nil)and(TBullet(bullets[i]).isVisable) then begin
+        Canvas.Draw(
+          TBullet(bullets[i]).x,
+          TBullet(bullets[i]).y,
+          TBullet(bullets[i]).img
+        );
+      end;
+    end;
+end;
+
+//общий вызов отрисовок
  procedure TGame.Frame();
  var
    i: integer;
  begin
     Canvas.Draw(player.x, player.y, player.img);
+    DrawEnemies();
+    DrawBullets();
+ end;
 
-    for i := 0 to enemies.Count - 1 do begin
-      Canvas.Draw(
-        TBot(enemies[i]).x,
-        TBot(enemies[i]).y,
-        TBot(enemies[i]).img
-      );
+// различные обновления
+procedure TGame.UpdateGame();
+const BULLET_STEP = 15;
+var i,j : integer;
+begin
+  // анимация полета пуль
+  for i := 0 to bullets.Count - 1 do begin
+    if TBullet(bullets[i]).y > MIN_Y then begin
+      TBullet(bullets[i]).y := TBullet(bullets[i]).y - BULLET_STEP;
+    end else begin
+      bullets.Remove(TBullet(bullets[i]));
+      break;
     end;
- end;
+    // проверка на столкновение с ботом
+    for j := 0 to enemies.Count - 1 do begin
 
- procedure TGame.UpdateGame();
- begin
+      if (TBullet(bullets[i]).y < TBot(enemies[j]).y+TBot(enemies[j]).height)
+      and (TBullet(bullets[i]).y > TBot(enemies[j]).y) and
+      (TBullet(bullets[i]).x > TBot(enemies[j]).x) and
+      (TBullet(bullets[i]).x < TBot(enemies[j]).x+TBot(enemies[j]).widht) and
+      (TBullet(bullets[i]).isVisable)
+      then
+      begin
+        TBot(enemies[j]).health := TBot(enemies[j]).health - 25;
+        TBullet(bullets[i]).isVisable := false;
+        if TBot(enemies[j]).health <= 0 then begin
+          enemies.Remove(TBot(enemies[j]));
+          break;
+        end;
+      end;
 
- end;
+    end;
+  end;
+end;
+
 end.
 

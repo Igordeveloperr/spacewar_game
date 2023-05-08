@@ -4,8 +4,10 @@ object Game: TGame
   Top = 181
   Width = 951
   Caption = 'Game'
+  Color = clCaptionText
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
+  OnMouseDown = FormMouseDown
   OnPaint = FormPaint
   OnShow = FormShow
   LCLVersion = '2.2.6.0'
