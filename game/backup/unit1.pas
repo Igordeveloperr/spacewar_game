@@ -7,6 +7,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls;
 
+const BULLET_STEP = 15;
 const STEP = 7;
 const MAX_X = 880;
 const MIN_X = 0;
@@ -18,7 +19,7 @@ type
   TPlayer = record
    img:TBitmap;
    imgSrc:string;
-   x,y: integer;
+   x,y,hp: integer;
    widht, height:integer;
   end;
 
@@ -29,13 +30,19 @@ type
    x,y: integer;
    widht, height:integer;
    isVisable: boolean;
-   constructor Create(player: TPlayer);
+   constructor Create(posX,posY,wid:integer; isEnemie:boolean);
   end;
 
   { TGame }
 
   TGame = class(TForm)
     Timer1: TTimer;
+    EnemieSpawnTimer: TTimer;
+    BotMoveTimer: TTimer;
+    EnemieBulletTimer: TTimer;
+    procedure BotMoveTimerExecute(Sender: TObject);
+    procedure EnemieBulletTimerExecute(Sender: TObject);
+    procedure EnemieSpawnTimerExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: char);
     procedure FormMouseDown(Sender: TObject; Button: TMouseButton;
@@ -50,6 +57,7 @@ type
     procedure MoveLeft();
     procedure MoveRight();
     procedure DrawEnemies();
+    procedure DrawEnemieBullets();
     procedure DrawBullets();
   public
 
@@ -69,7 +77,8 @@ type
 var
   Game: TGame;
   player: TPlayer;
-  enemies,bullets: TList;
+  enemie_bullets,enemies,bullets: TList;
+  iSwitchWay: boolean;
 
 implementation
 
@@ -81,11 +90,16 @@ begin
    if key in ['d'] then MoveRight;
 end;
 
-// механика стрельбы
+// создание пуль
 procedure TGame.FormMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
-  bullets.Add(TBullet.Create(player));
+  bullets.Add(TBullet.Create(
+    player.x,
+    player.y,
+    player.widht,
+    false
+  ));
 end;
 
 // запрет на изменение размеров формы
@@ -96,6 +110,85 @@ begin
     MinHeight:= Height;
     MaxWidth:= Width;
     MinWidth:= Width;
+  end;
+end;
+
+// рандомная генерация противника
+procedure TGame.EnemieSpawnTimerExecute(Sender: TObject);
+const SPAWN_ENEMIES_COUNT = 5;
+var
+  i,x,y : integer;
+  prints : array[0..1] of string;
+begin
+  prints[0] := 'assets\bot.bmp';
+  prints[1] := 'assets\bot1.bmp';
+  if enemies.Count = 0 then
+  begin
+    for i := 1 to SPAWN_ENEMIES_COUNT do
+    begin
+      x := random(MAX_X);
+      y := random(MAX_Y - 300);
+      enemies.Add(TBot.Create(
+        x,
+        y,
+        prints[random(High(prints)+1)]
+      ));
+    end;
+  end;
+end;
+
+// меняем направление движения противника
+procedure SwitchWay();
+begin
+  if iSwitchWay then
+  begin
+    iSwitchWay := false;
+  end else
+  begin
+    iSwitchWay := true;
+  end;
+end;
+
+// перемещение противника
+procedure MoveEnemie(enemie : TBot);
+const STEP = 40;
+begin
+  if iSwitchWay then
+  begin
+    enemie.x := enemie.x + STEP;
+  end else
+  begin
+    enemie.x := enemie.x - STEP;
+  end;
+end;
+
+// двигаем противников
+procedure TGame.BotMoveTimerExecute(Sender: TObject);
+var
+  i : integer;
+begin
+  SwitchWay();
+  if enemies.Count > 0 then
+  begin
+    for i := 0 to enemies.Count - 1 do
+    begin
+      MoveEnemie(TBot(enemies[i]));
+    end;
+  end;
+end;
+
+// генерация пуль противника
+procedure TGame.EnemieBulletTimerExecute(Sender: TObject);
+var i: integer;
+begin
+  for i := 0 to enemies.Count - 1 do
+  begin
+    enemie_bullets.Add(TBullet.Create(
+      TBot(enemies[i]).x,
+      TBot(enemies[i]).y,
+      TBot(enemies[i]).widht,
+      true
+    ));
   end;
 end;
 
@@ -125,13 +218,14 @@ begin
 end;
 
 //  конструктор пули
-constructor TBullet.Create(player: TPlayer);
+constructor TBullet.Create(posX,posY,wid:integer; isEnemie:boolean);
 begin
    img := TBitmap.Create;
    imgSrc := 'assets\bullet.bmp';
    img.LoadFromFile(imgSrc);
-   x := player.x + (player.widht div 2)-1;
-   y := player.y;
+   x := posX + (wid div 2)-1;
+   if isEnemie then y := posY+wid
+   else y := posY;
    height := img.Height;
    widht := img.Width;
    isVisable := true;
@@ -168,14 +262,35 @@ end;
    player.imgSrc := 'assets\Player.bmp';
    player.img.LoadFromFile(player.imgSrc);
    player.x := MAX_X div 2;
-   player.y := MAX_Y;
+   player.y := MAX_Y - 100;
+   player.hp := 100;
    player.height := player.img.Height;
    player.widht := player.img.Width;
+
+   enemie_bullets := TList.Create;
 
    enemies := TList.Create;
    enemies.Add(TBot.Create(100, 100, 'assets\bot.bmp'));
    enemies.Add(TBot.Create(530, 80, 'assets\bot1.bmp'));
+   enemies.Add(TBot.Create(630, 90, 'assets\bot1.bmp'));
    enemies.Add(TBot.Create(800, 150, 'assets\bot.bmp'));
+   enemies.Add(TBot.Create(90, 330, 'assets\bot.bmp'));
+ end;
+
+// отрисовка пуль противника
+ procedure TGame.DrawEnemieBullets();
+ var i : integer;
+ begin
+   for i := 0 to enemie_bullets.Count - 1 do begin
+      if (TBullet(enemie_bullets[i]) <> nil)
+      and(TBullet(enemie_bullets[i]).isVisable) then begin
+        Canvas.Draw(
+          TBullet(enemie_bullets[i]).x,
+          TBullet(enemie_bullets[i]).y,
+          TBullet(enemie_bullets[i]).img
+        );
+      end;
+   end;
  end;
 
 // отрисовка врагов
@@ -195,7 +310,7 @@ end;
 
 // отрисовка пуль
 procedure TGame.DrawBullets();
-var i : integer
+var i : integer;
 begin
   for i := 0 to bullets.Count - 1 do begin
       if (TBullet(bullets[i]) <> nil)and(TBullet(bullets[i]).isVisable) then begin
@@ -216,11 +331,11 @@ end;
     Canvas.Draw(player.x, player.y, player.img);
     DrawEnemies();
     DrawBullets();
+    DrawEnemieBullets();
  end;
 
-// различные обновления
-procedure TGame.UpdateGame();
-const BULLET_STEP = 15;
+// механика стрельбы игрока
+procedure PlayerShoot();
 var i,j : integer;
 begin
   // анимация полета пуль
@@ -233,7 +348,7 @@ begin
     end;
     // проверка на столкновение с ботом
     for j := 0 to enemies.Count - 1 do begin
-
+      // регистрация попадания
       if (TBullet(bullets[i]).y < TBot(enemies[j]).y+TBot(enemies[j]).height)
       and (TBullet(bullets[i]).y > TBot(enemies[j]).y) and
       (TBullet(bullets[i]).x > TBot(enemies[j]).x) and
@@ -251,6 +366,50 @@ begin
 
     end;
   end;
+end;
+
+// механика стрельбы противника
+procedure EnemieShoot();
+var i,j : integer;
+begin
+  for i := 0 to enemie_bullets.Count - 1 do
+  begin
+    // анимация полета
+    if TBullet(enemie_bullets[i]).y < MAX_Y
+    then begin
+      TBullet(enemie_bullets[i]).y :=
+      TBullet(enemie_bullets[i]).y + 5;
+    end else
+    begin
+      enemie_bullets.Remove(
+        TBullet(enemie_bullets[i]
+      ));
+      break;
+    end;
+    // поподание по игроку
+    if (TBullet(enemie_bullets[i]).y < player.y+player.height)
+      and (TBullet(enemie_bullets[i]).y > player.y) and
+      (TBullet(enemie_bullets[i]).x > player.x) and
+      (TBullet(enemie_bullets[i]).x < player.x+player.widht) and
+      (TBullet(enemie_bullets[i]).isVisable)
+    then begin
+       TBullet(enemie_bullets[i]).isVisable := false;
+       player.hp := player.hp - 20;
+       // возраждение короч
+       if player.hp <= 0 then begin
+         ShowMessage('Вы проебали!');
+         break;
+       end;
+    end;
+  end;
+end;
+
+// различные обновления
+procedure TGame.UpdateGame();
+begin
+  // стрельба игрока
+  PlayerShoot();
+  EnemieShoot();
 end;
 
 end.

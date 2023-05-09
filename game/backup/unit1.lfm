@@ -1,7 +1,7 @@
 object Game: TGame
-  Left = 64
+  Left = 166
   Height = 688
-  Top = 181
+  Top = 210
   Width = 951
   Caption = 'Game'
   Color = clCaptionText
@@ -16,5 +16,23 @@ object Game: TGame
     OnTimer = Timer1Timer
     Left = 26
     Top = 40
+  end
+  object EnemieSpawnTimer: TTimer
+    Interval = 10
+    OnTimer = EnemieSpawnTimerExecute
+    Left = 24
+    Top = 106
+  end
+  object BotMoveTimer: TTimer
+    Interval = 400
+    OnTimer = BotMoveTimerExecute
+    Left = 35
+    Top = 203
+  end
+  object EnemieBulletTimer: TTimer
+    Interval = 4000
+    OnTimer = EnemieBulletTimerExecute
+    Left = 32
+    Top = 264
   end
 end
