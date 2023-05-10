@@ -1,10 +1,10 @@
 object Game: TGame
-  Left = 166
+  Left = 152
   Height = 688
-  Top = 210
+  Top = 79
   Width = 951
   Caption = 'Game'
-  Color = clCaptionText
+  Color = clBlack
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   OnMouseDown = FormMouseDown

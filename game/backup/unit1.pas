@@ -5,7 +5,7 @@ unit Unit1;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls,unit2;
 
 const BULLET_STEP = 15;
 const STEP = 7;
@@ -59,6 +59,10 @@ type
     procedure DrawEnemies();
     procedure DrawEnemieBullets();
     procedure DrawBullets();
+    procedure DrawPlayerHp();
+    procedure DrawPlayerScore();
+    procedure DrawFrame();
+    procedure DrawLvl();
   public
 
   end;
@@ -79,6 +83,7 @@ var
   player: TPlayer;
   enemie_bullets,enemies,bullets: TList;
   iSwitchWay: boolean;
+  score,prevScore,spawnEnemiesCount,lvl: integer;
 
 implementation
 
@@ -105,6 +110,9 @@ end;
 // запрет на изменение размеров формы
 procedure TGame.FormCreate(Sender: TObject);
 begin
+  score:=0;
+  spawnEnemiesCount:=5;
+  lvl:=1;
   with Self, Constraints do begin
     MaxHeight:= Height;
     MinHeight:= Height;
@@ -113,9 +121,20 @@ begin
   end;
 end;
 
+// увеличение уровня сложности
+procedure IncLvl();
+const STAGE = 100;
+begin
+  if score-prevScore >= STAGE then
+  begin
+    Inc(lvl);
+    prevScore := score;
+    spawnEnemiesCount := spawnEnemiesCount + 2;
+  end;
+end;
+
 // рандомная генерация противника
 procedure TGame.EnemieSpawnTimerExecute(Sender: TObject);
-const SPAWN_ENEMIES_COUNT = 5;
 var
   i,x,y : integer;
   prints : array[0..1] of string;
@@ -124,7 +143,8 @@ begin
   prints[1] := 'assets\bot1.bmp';
   if enemies.Count = 0 then
   begin
-    for i := 1 to SPAWN_ENEMIES_COUNT do
+    IncLvl();
+    for i := 1 to spawnEnemiesCount do
     begin
       x := random(MAX_X);
       y := random(MAX_Y - 300);
@@ -323,12 +343,72 @@ begin
     end;
 end;
 
+// вывод hp
+procedure TGame.DrawPlayerHp();
+var hp : string;
+begin
+  str(player.hp, hp);
+  Canvas.Font.Color := clRed;
+  Canvas.Font.Size := 14;
+  Canvas.Font.Style := [fsBold];
+  Canvas.TextOut(
+    MAX_X - 100,
+    MAX_Y,
+    hp+' HP'
+  );
+end;
+
+// отрисовка очков игрока
+procedure TGame.DrawPlayerScore();
+var outScore : string;
+begin
+  str(score, outScore);
+  Canvas.Font.Color := clGreen;
+  Canvas.Font.Size := 14;
+  Canvas.Font.Style := [fsBold];
+  Canvas.TextOut(
+    MAX_X - 100,
+    MAX_Y + 30,
+    'Score - ' + outScore
+  );
+end;
+
+// отрисовка уровня сложности
+procedure TGame.DrawLvl();
+var outLvl : string;
+begin
+  str(lvl, outLvl);
+  Canvas.Font.Color := clTeal;
+  Canvas.Font.Size := 14;
+  Canvas.Font.Style := [fsBold];
+  Canvas.TextOut(
+    MAX_X - 100,
+    MAX_Y + 60,
+    'LVL - ' + outLvl
+  );
+end;
+
+// отрисовка рамки
+procedure TGame.DrawFrame();
+begin
+  Canvas.Pen.Color:=clYellow;
+  Canvas.MoveTo(MAX_X+100, MAX_Y - 10);
+  Canvas.LineTo(MAX_X - 120, MAX_Y - 10);
+  Canvas.LineTo(MAX_X - 120, MAX_Y + 150);
+  Canvas.LineTo(MAX_X+100, MAX_Y+150);
+  Canvas.LineTo(MAX_X+100, MAX_Y - 10);
+end;
+
 //общий вызов отрисовок
  procedure TGame.Frame();
  var
    i: integer;
  begin
     Canvas.Draw(player.x, player.y, player.img);
+    DrawPlayerHp();
+    DrawPlayerScore();
+    DrawLvl();
+    DrawFrame();
     DrawEnemies();
     DrawBullets();
     DrawEnemieBullets();
@@ -358,7 +438,9 @@ begin
       begin
         TBot(enemies[j]).health := TBot(enemies[j]).health - 25;
         TBullet(bullets[i]).isVisable := false;
+        // уничтожение бота
         if TBot(enemies[j]).health <= 0 then begin
+          score := score  + 10;
           enemies.Remove(TBot(enemies[j]));
           break;
         end;
@@ -395,9 +477,10 @@ begin
     then begin
        TBullet(enemie_bullets[i]).isVisable := false;
        player.hp := player.hp - 20;
-       // возраждение короч
+       // возрождение короч
        if player.hp <= 0 then begin
          ShowMessage('Вы проебали!');
+         WireGame.Show;
          break;
        end;
     end;
