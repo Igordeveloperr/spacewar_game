@@ -19,6 +19,7 @@ type
     BitBtn4: TBitBtn;
     BitBtn5: TBitBtn;
     BitBtn6: TBitBtn;
+    respawnBtn: TButton;
     Label1: TLabel;
     procedure BitBtn1Click(Sender: TObject);
     procedure BitBtn2Click(Sender: TObject);
@@ -48,6 +49,8 @@ var
   point1, point2: TPoint;
   color1,color2 : TColor;
   btns1,btns2 : TList;
+  prevColors: array[1..3]of TColor;
+  count:integer;
 implementation
 
 {$R *.lfm}
@@ -57,8 +60,20 @@ implementation
 // рисование провода
 procedure TWireGame.DraWire();
 begin
-  if color2 = color1 then
+  if (color2 = color1)and(color2 not in prevColors)then
   begin
+    Dec(count);
+    if count <= 0 then
+    begin
+      prevColors.Clear;
+      BitBtn1.Enabled:=false;
+      BitBtn2.Enabled:=false;
+      BitBtn3.Enabled:=false;
+      BitBtn4.Enabled:=false;
+      BitBtn5.Enabled:=false;
+      BitBtn6.Enabled:=false;
+      respawnBtn.Enabled:=true;
+    end;
     Canvas.Pen.Color := color2;
     Canvas.Line(point1, point2);
   end;
@@ -158,6 +173,14 @@ var
   i,j,z : integer;
   arr : array[1..3] of TPattern;
 begin
+  BitBtn1.Enabled:=true;
+  BitBtn2.Enabled:=true;
+  BitBtn3.Enabled:=true;
+  BitBtn4.Enabled:=true;
+  BitBtn5.Enabled:=true;
+  BitBtn6.Enabled:=true;
+  respawnBtn.Enabled:=false;
+  count := 3;
   BitBtn1Click(Sender);
   BitBtn2Click(Sender);
   btns1 := TList.Create;

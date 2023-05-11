@@ -1,12 +1,12 @@
 object WireGame: TWireGame
-  Left = 128
+  Left = 251
   Height = 480
-  Top = 260
+  Top = 267
   Width = 608
   Caption = 'WireGame'
   ClientHeight = 480
   ClientWidth = 608
-  Color = clTeal
+  Color = clBlack
   OnCreate = FormCreate
   OnShow = FormShow
   LCLVersion = '2.2.6.0'
@@ -79,5 +79,20 @@ object WireGame: TWireGame
     Font.Style = [fsItalic]
     ParentColor = False
     ParentFont = False
+  end
+  object respawnBtn: TButton
+    Left = 184
+    Height = 72
+    Top = 352
+    Width = 192
+    Caption = 'Возродиться'
+    Font.CharSet = RUSSIAN_CHARSET
+    Font.Height = -19
+    Font.Name = 'Yu Gothic UI Semibold'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    Font.Style = [fsBold, fsItalic]
+    ParentFont = False
+    TabOrder = 6
   end
 end
