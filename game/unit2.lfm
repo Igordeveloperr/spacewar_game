@@ -1,20 +1,19 @@
 object WireGame: TWireGame
-  Left = 390
-  Height = 488
-  Top = 146
-  Width = 603
+  Left = 624
+  Height = 732
+  Top = 187
+  Width = 904
   Caption = 'WireGame'
-  ClientHeight = 488
-  ClientWidth = 603
-  Color = clNone
+  Color = 12370629
+  DesignTimePPI = 144
+  OnClick = FormClick
+  OnCreate = FormCreate
+  OnMouseDown = FormMouseDown
   LCLVersion = '2.2.6.0'
-  object RadioButton1: TRadioButton
-    Left = 104
-    Height = 21
-    Top = 64
-    Width = 22
-    Color = clHighlight
-    ParentColor = False
-    TabOrder = 0
+  object PrintTimer: TTimer
+    Interval = 10
+    OnTimer = PrintTimerExecute
+    Left = 74
+    Top = 70
   end
 end

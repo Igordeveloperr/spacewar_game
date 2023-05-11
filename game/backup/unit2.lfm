@@ -1,0 +1,19 @@
+object WireGame: TWireGame
+  Left = 624
+  Height = 732
+  Top = 187
+  Width = 904
+  Caption = 'WireGame'
+  Color = 12370629
+  DesignTimePPI = 144
+  OnClick = FormClick
+  OnCreate = FormCreate
+  OnMouseDown = FormMouseDown
+  LCLVersion = '2.2.6.0'
+  object PrintTimer: TTimer
+    Interval = 10
+    OnTimer = PrintTimerExecute
+    Left = 74
+    Top = 70
+  end
+end

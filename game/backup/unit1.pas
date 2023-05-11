@@ -452,6 +452,7 @@ end;
 
 // механика стрельбы противника
 procedure EnemieShoot();
+const DAMAGE = 100;
 var i,j : integer;
 begin
   for i := 0 to enemie_bullets.Count - 1 do
@@ -476,10 +477,10 @@ begin
       (TBullet(enemie_bullets[i]).isVisable)
     then begin
        TBullet(enemie_bullets[i]).isVisable := false;
-       player.hp := player.hp - 20;
+       player.hp := player.hp - DAMAGE;
        // возрождение короч
        if player.hp <= 0 then begin
-         ShowMessage('Вы проебали!');
+         //ShowMessage('Вы проебали!');
          WireGame.Show;
          break;
        end;
