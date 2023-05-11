@@ -1,19 +1,83 @@
 object WireGame: TWireGame
-  Left = 624
-  Height = 732
-  Top = 187
-  Width = 904
+  Left = 128
+  Height = 480
+  Top = 260
+  Width = 608
   Caption = 'WireGame'
-  Color = 12370629
-  DesignTimePPI = 144
-  OnClick = FormClick
+  ClientHeight = 480
+  ClientWidth = 608
+  Color = clTeal
   OnCreate = FormCreate
-  OnMouseDown = FormMouseDown
+  OnShow = FormShow
   LCLVersion = '2.2.6.0'
-  object PrintTimer: TTimer
-    Interval = 10
-    OnTimer = PrintTimerExecute
-    Left = 74
-    Top = 70
+  object BitBtn1: TBitBtn
+    Left = 104
+    Height = 30
+    Top = 128
+    Width = 91
+    Caption = 'BitBtn1'
+    OnClick = BitBtn1Click
+    TabOrder = 0
+  end
+  object BitBtn2: TBitBtn
+    Left = 104
+    Height = 30
+    Top = 192
+    Width = 91
+    Caption = 'BitBtn2'
+    OnClick = BitBtn2Click
+    TabOrder = 1
+  end
+  object BitBtn3: TBitBtn
+    Left = 104
+    Height = 30
+    Top = 264
+    Width = 91
+    Caption = 'BitBtn3'
+    OnClick = BitBtn3Click
+    TabOrder = 2
+  end
+  object BitBtn4: TBitBtn
+    Left = 393
+    Height = 30
+    Top = 128
+    Width = 95
+    Caption = 'BitBtn4'
+    OnClick = BitBtn4Click
+    TabOrder = 3
+  end
+  object BitBtn5: TBitBtn
+    Left = 393
+    Height = 30
+    Top = 192
+    Width = 95
+    Caption = 'BitBtn5'
+    OnClick = BitBtn5Click
+    TabOrder = 4
+  end
+  object BitBtn6: TBitBtn
+    Left = 393
+    Height = 30
+    Top = 264
+    Width = 95
+    Caption = 'BitBtn6'
+    OnClick = BitBtn6Click
+    TabOrder = 5
+  end
+  object Label1: TLabel
+    Left = 64
+    Height = 27
+    Top = 40
+    Width = 502
+    Caption = 'Соедините клеммы по цветам'
+    Font.CharSet = ANSI_CHARSET
+    Font.Color = clWhite
+    Font.Height = -21
+    Font.Name = 'Yu Gothic'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    Font.Style = [fsItalic]
+    ParentColor = False
+    ParentFont = False
   end
 end

@@ -5,128 +5,192 @@ unit Unit2;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
+  Buttons;
 
 type
 
   { TWireGame }
 
   TWireGame = class(TForm)
-    PrintTimer: TTimer;
-    procedure FormClick(Sender: TObject);
+    BitBtn1: TBitBtn;
+    BitBtn2: TBitBtn;
+    BitBtn3: TBitBtn;
+    BitBtn4: TBitBtn;
+    BitBtn5: TBitBtn;
+    BitBtn6: TBitBtn;
+    Label1: TLabel;
+    procedure BitBtn1Click(Sender: TObject);
+    procedure BitBtn2Click(Sender: TObject);
+    procedure BitBtn3Click(Sender: TObject);
+    procedure BitBtn4Click(Sender: TObject);
+    procedure BitBtn5Click(Sender: TObject);
+    procedure BitBtn6Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure FormMouseDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
-    procedure PrintTimerExecute(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
-    procedure GenerateConnectors();
+     procedure ResetCoords();
+     procedure ResetColor();
+     procedure SelectColor(cl : TColor);
+     procedure SelectPoint(point : TPoint);
+     procedure DraWire();
   public
 
   end;
 
-  TConnector = class
-  public
-    x : integer;
-    y : integer;
-    width:integer;
-    height:integer;
-    color : TColor;
-   constructor Create(posX, posY:integer; cl: TColor);
+  TPattern = record
+    text: string;
+    color: TColor;
   end;
 
 var
   WireGame: TWireGame;
-  x0,y0,x1,y1: integer;
-  connectors : TList;
-
+  point1, point2: TPoint;
+  color1,color2 : TColor;
+  btns1,btns2 : TList;
 implementation
 
 {$R *.lfm}
 
 { TWireGame }
 
-// конструктор коннектора
-constructor TConnector.Create(posX, posY:integer; cl: TColor);
+// рисование провода
+procedure TWireGame.DraWire();
 begin
-  x := posX;
-  y := posY;
-  color := cl;
-end;
-
-procedure TWireGame.FormClick(Sender: TObject);
-begin
-
-end;
-
-// создание точек подключения
-procedure TWireGame.GenerateConnectors();
-const WIRECOUNT = 3;
-var
-  connector, connector2 : TConnector;
-  i : integer;
-  colors : array[1..3] of TColor;
-begin
-  colors[1] := clRed;
-  colors[2] := clGreen;
-  colors[3] := clYellow;
-  for i := 1 to WIRECOUNT do
+  if color2 = color1 then
   begin
-     connectors.Add(TConnector.Create(
-       i * 10,
-       i * 10,
-       colors[i]
-     ));
-
-     connectors.Add(TConnector.Create(
-       i * 10 + 100,
-       i * 10 + 50,
-       colors[i]
-     ));
+    Canvas.Pen.Color := color2;
+    Canvas.Line(point1, point2);
   end;
+  ResetCoords();
+  ResetColor();
 end;
 
 // сброс координат
-procedure ResetCoords();
+procedure TWireGame.ResetCoords();
 begin
-  x0 := -1;
-  y0 := -1;
-  x1 := -1;
-  y1 := -1;
+ point1:=point1.Zero;
+ point2:=point2.Zero;
+end;
+
+// сброс цвета
+procedure TWireGame.ResetColor();
+begin
+ color1 := clNone;
+ color2 := clNone;
+end;
+
+// определение цвета провода
+procedure TWireGame.SelectColor(cl : TColor);
+begin
+ if color1 = clNone then
+ begin
+   color1 := cl;
+ end else
+ begin
+   color2 := cl;
+ end;
+end;
+
+// определение точек для отрисовки провода
+procedure TWireGame.SelectPoint(point : TPoint);
+begin
+  if not(point1.IsZero) then
+  begin
+    point2 := point;
+    DraWire();
+  end else
+  begin
+    point1 := point;
+  end;
+end;
+
+procedure TWireGame.BitBtn1Click(Sender: TObject);
+begin
+  SelectColor(BitBtn1.Font.Color);
+  SelectPoint(BitBtn1.ReadBounds.CenterPoint);
+end;
+
+procedure TWireGame.BitBtn2Click(Sender: TObject);
+begin
+  SelectColor(BitBtn2.Font.Color);
+  SelectPoint(BitBtn2.ReadBounds.CenterPoint);
+end;
+
+procedure TWireGame.BitBtn3Click(Sender: TObject);
+begin
+  SelectColor(BitBtn3.Font.Color);
+  SelectPoint(BitBtn3.ReadBounds.CenterPoint);
+end;
+
+procedure TWireGame.BitBtn4Click(Sender: TObject);
+begin
+  SelectColor(BitBtn4.Font.Color);
+  SelectPoint(BitBtn4.ReadBounds.CenterPoint);
+end;
+
+procedure TWireGame.BitBtn5Click(Sender: TObject);
+begin
+  SelectColor(BitBtn5.Font.Color);
+  SelectPoint(BitBtn5.ReadBounds.CenterPoint);
+end;
+
+procedure TWireGame.BitBtn6Click(Sender: TObject);
+begin
+  SelectColor(BitBtn6.Font.Color);
+  SelectPoint(BitBtn6.ReadBounds.CenterPoint);
 end;
 
 procedure TWireGame.FormCreate(Sender: TObject);
 begin
-  connectors := TList.Create;
-  GenerateConnectors();
-  ResetCoords();
-end;
-
-// определение координат для провода
-procedure TWireGame.FormMouseDown(Sender: TObject; Button: TMouseButton;
-  Shift: TShiftState; X, Y: integer);
-begin
-   if (x0 > 0)and(y0 > 0) then
-   begin
-     x1 := X;
-     y1 := Y;
-   end else
-   begin
-     x0 := X;
-     y0 := Y;
-   end;
-end;
-
-// отрисовка провода
-procedure TWireGame.PrintTimerExecute(Sender: TObject);
-begin
-  if (x0 > 0)and(y0 > 0)and(x1 > 0)and(y1 > 0)then
-  begin
-    Canvas.Pen.Color := clGreen;
-    Canvas.Pen.Width := 10;
-    Canvas.Line(x0,y0,x1,y1);
-    ResetCoords();
+  with Self, Constraints do begin
+    MaxHeight:= Height;
+    MinHeight:= Height;
+    MaxWidth:= Width;
+    MinWidth:= Width;
   end;
+  Canvas.Pen.Width := 10;
 end;
+
+// рандомная генерация клемм
+procedure TWireGame.FormShow(Sender: TObject);
+var
+  i,j,z : integer;
+  arr : array[1..3] of TPattern;
+begin
+  BitBtn1Click(Sender);
+  BitBtn2Click(Sender);
+  btns1 := TList.Create;
+  btns1.Add(BitBtn1);
+  btns1.Add(BitBtn2);
+  btns1.Add(BitBtn3);
+
+  btns2 := TList.Create;
+  btns2.Add(BitBtn4);
+  btns2.Add(BitBtn5);
+  btns2.Add(BitBtn6);
+
+  arr[1].text:= 'красный';
+  arr[1].color:= clRed;
+  arr[2].text:= 'фиолетовый';
+  arr[2].color:= clPurple;
+  arr[3].text:= 'зелёный';
+  arr[3].color:= clGreen;
+  for z := 1 to 3 do
+    begin
+      i := random(btns1.Count-1);
+      j := random(btns2.Count-1);
+
+      TBitBtn(btns1[i]).Caption:=arr[z].text;
+      TBitBtn(btns1[i]).Font.Color:=arr[z].color;
+      TBitBtn(btns2[j]).Caption:=arr[z].text;
+      TBitBtn(btns2[j]).Font.Color:=arr[z].color;
+
+      btns1.Remove(TBitBtn(btns1[i]));
+      btns2.Remove(TBitBtn(btns2[j]));
+    end;
+end;
+
 
 end.
 
