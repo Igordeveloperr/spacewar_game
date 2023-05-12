@@ -1,11 +1,10 @@
 object Game: TGame
-  Left = 152
-  Height = 1032
-  Top = 79
-  Width = 1426
+  Left = 115
+  Height = 688
+  Top = 202
+  Width = 951
   Caption = 'Game'
   Color = clBlack
-  DesignTimePPI = 144
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   OnMouseDown = FormMouseDown
@@ -15,25 +14,30 @@ object Game: TGame
   object Timer1: TTimer
     Interval = 10
     OnTimer = Timer1Timer
-    Left = 39
-    Top = 60
+    Left = 26
+    Top = 40
   end
   object EnemieSpawnTimer: TTimer
     Interval = 10
     OnTimer = EnemieSpawnTimerExecute
-    Left = 36
-    Top = 159
+    Left = 24
+    Top = 106
   end
   object BotMoveTimer: TTimer
     Interval = 400
     OnTimer = BotMoveTimerExecute
-    Left = 53
-    Top = 305
+    Left = 35
+    Top = 203
   end
   object EnemieBulletTimer: TTimer
     Interval = 4000
     OnTimer = EnemieBulletTimerExecute
-    Left = 48
-    Top = 396
+    Left = 32
+    Top = 264
+  end
+  object ResTimer: TTimer
+    Interval = 10
+    Left = 52
+    Top = 390
   end
 end

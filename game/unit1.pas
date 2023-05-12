@@ -40,6 +40,7 @@ type
     EnemieSpawnTimer: TTimer;
     BotMoveTimer: TTimer;
     EnemieBulletTimer: TTimer;
+    ResTimer: TTimer;
     procedure BotMoveTimerExecute(Sender: TObject);
     procedure EnemieBulletTimerExecute(Sender: TObject);
     procedure EnemieSpawnTimerExecute(Sender: TObject);
@@ -84,15 +85,19 @@ var
   enemie_bullets,enemies,bullets: TList;
   iSwitchWay: boolean;
   score,prevScore,spawnEnemiesCount,lvl: integer;
+  isWireGame : boolean;
 
 implementation
 
 {$R *.lfm}
 // управление игроком
 procedure TGame.FormKeyPress(Sender: TObject; var Key: char);
+var s : string;
 begin
-   if key in ['a'] then MoveLeft;
-   if key in ['d'] then MoveRight;
+  str(Ord(Key),s);
+   //ShowMessage(s);
+   if key = #97 then MoveLeft;
+   if key = #100 then MoveRight;
 end;
 
 // создание пуль
@@ -110,6 +115,8 @@ end;
 // запрет на изменение размеров формы
 procedure TGame.FormCreate(Sender: TObject);
 begin
+  Game.BorderStyle:=bsDialog;
+  isWireGame:=false;
   score:=0;
   spawnEnemiesCount:=5;
   lvl:=1;
@@ -125,12 +132,15 @@ end;
 procedure IncLvl();
 const STAGE = 100;
 begin
-  if score-prevScore >= STAGE then
+  if lvl < 10 then
   begin
-    Inc(lvl);
-    prevScore := score;
-    spawnEnemiesCount := spawnEnemiesCount + 2;
+     if score-prevScore >= STAGE then
+     begin
+       prevScore := score;
+       spawnEnemiesCount := spawnEnemiesCount + 2;
+     end;
   end;
+  Inc(lvl);
 end;
 
 // рандомная генерация противника
@@ -254,7 +264,29 @@ end;
 // переотрисовку в отдельный поток
 procedure TGame.Timer1Timer(Sender: TObject);
 begin
-  Repaint();
+  if isWireGame then
+  begin
+    if unit2.isReadyToRespawn then
+    begin
+      lvl:=1;
+      player.hp:=100;
+      score:=0;
+      prevScore :=0;
+      spawnEnemiesCount:=5;
+      enemies.Clear;
+      enemie_bullets.Clear;
+      isWireGame := false;
+    end;
+    Game.Enabled:=false;
+  end else
+  begin
+    Game.Enabled:=true;
+    if Game.CanFocus then
+    begin
+      Game.SetFocus;
+    end;
+    Repaint();
+  end;
 end;
 
 // перемещение игрока начало
@@ -416,6 +448,7 @@ end;
 
 // механика стрельбы игрока
 procedure PlayerShoot();
+const SCORES = 10;
 var i,j : integer;
 begin
   // анимация полета пуль
@@ -440,7 +473,7 @@ begin
         TBullet(bullets[i]).isVisable := false;
         // уничтожение бота
         if TBot(enemies[j]).health <= 0 then begin
-          score := score  + 10;
+          score := score  + SCORES;
           enemies.Remove(TBot(enemies[j]));
           break;
         end;
@@ -450,9 +483,27 @@ begin
   end;
 end;
 
+procedure HideEnemies();
+var i : integer;
+begin
+  for i := 0 to enemies.Count-1 do
+  begin
+    TBot(enemies[i]).isVisable:=false;
+  end;
+end;
+
+procedure HideEnemiesBullets();
+var i : integer;
+begin
+  for i := 0 to enemie_bullets.Count-1 do
+  begin
+    TBullet(enemie_bullets[i]).isVisable:=false;
+  end;
+end;
+
 // механика стрельбы противника
 procedure EnemieShoot();
-const DAMAGE = 100;
+const DAMAGE = 20;
 var i,j : integer;
 begin
   for i := 0 to enemie_bullets.Count - 1 do
@@ -481,6 +532,7 @@ begin
        // возрождение короч
        if player.hp <= 0 then begin
          WireGame.Show;
+         isWireGame := true;
          break;
        end;
     end;

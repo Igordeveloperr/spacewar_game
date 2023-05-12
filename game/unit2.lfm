@@ -1,11 +1,11 @@
 object WireGame: TWireGame
-  Left = 105
+  Left = 141
   Height = 480
-  Top = 252
+  Top = 232
   Width = 608
   Caption = 'WireGame'
-  ClientHeight = 480
-  ClientWidth = 608
+  ClientHeight = 0
+  ClientWidth = 0
   Color = clBlack
   OnCreate = FormCreate
   OnShow = FormShow
@@ -92,6 +92,7 @@ object WireGame: TWireGame
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
     Font.Style = [fsBold, fsItalic]
+    OnClick = respawnBtnClick
     ParentFont = False
     TabOrder = 6
   end

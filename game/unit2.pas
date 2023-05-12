@@ -29,6 +29,7 @@ type
     procedure BitBtn6Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure respawnBtnClick(Sender: TObject);
   private
      procedure ResetCoords();
      procedure ResetColor();
@@ -48,30 +49,37 @@ var
   WireGame: TWireGame;
   point1, point2: TPoint;
   color1,color2 : TColor;
-  btns1,btns2 : TList;
-  prevColors: array[1..3]of TColor;
+  btns1,btns2,btns : TList;
   count:integer;
+  isReadyToRespawn : boolean;
 implementation
 
 {$R *.lfm}
 
 { TWireGame }
 
+// блокировка клемм к которым подключен провод
+procedure LockBtns(cl : TColor);
+var i : integer;
+begin
+  for i := 0 to btns.Count-1 do
+  begin
+    if TBitBtn(btns[i]).Font.Color = cl then
+    begin
+      TBitBtn(btns[i]).Enabled:=false;
+    end;
+  end;
+end;
+
 // рисование провода
 procedure TWireGame.DraWire();
 begin
-  if (color2 = color1)and(color2 not in prevColors)then
+  if (color2 = color1)and(point1.X <> point2.X)then
   begin
+    LockBtns(color2);
     Dec(count);
     if count <= 0 then
     begin
-      prevColors.Clear;
-      BitBtn1.Enabled:=false;
-      BitBtn2.Enabled:=false;
-      BitBtn3.Enabled:=false;
-      BitBtn4.Enabled:=false;
-      BitBtn5.Enabled:=false;
-      BitBtn6.Enabled:=false;
       respawnBtn.Enabled:=true;
     end;
     Canvas.Pen.Color := color2;
@@ -164,7 +172,10 @@ begin
     MaxWidth:= Width;
     MinWidth:= Width;
   end;
+  isReadyToRespawn := false;
   Canvas.Pen.Width := 10;
+  WireGame.BorderStyle:=bsDialog;
+  WireGame.BorderIcons:=[];
 end;
 
 // рандомная генерация клемм
@@ -173,6 +184,7 @@ var
   i,j,z : integer;
   arr : array[1..3] of TPattern;
 begin
+  isReadyToRespawn := false;
   BitBtn1.Enabled:=true;
   BitBtn2.Enabled:=true;
   BitBtn3.Enabled:=true;
@@ -212,6 +224,20 @@ begin
       btns1.Remove(TBitBtn(btns1[i]));
       btns2.Remove(TBitBtn(btns2[j]));
     end;
+
+  btns := TList.Create;
+  btns.Add(BitBtn1);
+  btns.Add(BitBtn2);
+  btns.Add(BitBtn3);
+  btns.Add(BitBtn4);
+  btns.Add(BitBtn5);
+  btns.Add(BitBtn6);
+end;
+
+procedure TWireGame.respawnBtnClick(Sender: TObject);
+begin
+  isReadyToRespawn := true;
+  WireGame.Close;
 end;
 
 
