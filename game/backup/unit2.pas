@@ -19,8 +19,12 @@ type
     BitBtn4: TBitBtn;
     BitBtn5: TBitBtn;
     BitBtn6: TBitBtn;
+    Label2: TLabel;
+    LTime: TLabel;
     respawnBtn: TButton;
     Label1: TLabel;
+    Timer1: TTimer;
+    Timer2: TTimer;
     procedure BitBtn1Click(Sender: TObject);
     procedure BitBtn2Click(Sender: TObject);
     procedure BitBtn3Click(Sender: TObject);
@@ -30,6 +34,8 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure respawnBtnClick(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
+    procedure Timer2Timer(Sender: TObject);
   private
      procedure ResetCoords();
      procedure ResetColor();
@@ -50,7 +56,7 @@ var
   point1, point2: TPoint;
   color1,color2 : TColor;
   btns1,btns2,btns : TList;
-  count:integer;
+  count,time:integer;
   isReadyToRespawn : boolean;
 implementation
 
@@ -175,6 +181,10 @@ begin
   isReadyToRespawn := false;
   Canvas.Pen.Width := 10;
   WireGame.BorderStyle:=bsDialog;
+  WireGame.BorderIcons:=[];
+  time:=10;
+  Timer1.Enabled:=false;
+  Timer2.Enabled:=false;
 end;
 
 // рандомная генерация клемм
@@ -183,6 +193,7 @@ var
   i,j,z : integer;
   arr : array[1..3] of TPattern;
 begin
+  time:=10;
   isReadyToRespawn := false;
   BitBtn1.Enabled:=true;
   BitBtn2.Enabled:=true;
@@ -231,12 +242,33 @@ begin
   btns.Add(BitBtn4);
   btns.Add(BitBtn5);
   btns.Add(BitBtn6);
+  Timer1.Enabled:=true;
+  Timer2.Enabled:=true;
 end;
 
 procedure TWireGame.respawnBtnClick(Sender: TObject);
 begin
   isReadyToRespawn := true;
+  Timer1.Enabled:=false;
+  Timer2.Enabled:=false;
   WireGame.Close;
+end;
+
+procedure TWireGame.Timer1Timer(Sender: TObject);
+begin
+   Canvas.Erase;
+   Repaint;
+   ResetCoords();
+   ResetColor();
+   FormShow(Sender);
+end;
+
+procedure TWireGame.Timer2Timer(Sender: TObject);
+var outTime : string;
+begin
+  time:=time-1;
+  str(time, outTime);
+  LTime.Caption:=outTime+' сек';
 end;
 
 

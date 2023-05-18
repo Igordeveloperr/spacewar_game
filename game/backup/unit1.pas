@@ -9,7 +9,7 @@ uses
 
 const BULLET_STEP = 15;
 const STEP = 7;
-const MAX_X = 880;
+const MAX_X = 900;
 const MIN_X = 0;
 
 const MAX_Y = 580;
@@ -41,6 +41,8 @@ type
     BotMoveTimer: TTimer;
     EnemieBulletTimer: TTimer;
     ResTimer: TTimer;
+    aidSpawn: TTimer;
+    procedure aidSpawnTimer(Sender: TObject);
     procedure BotMoveTimerExecute(Sender: TObject);
     procedure EnemieBulletTimerExecute(Sender: TObject);
     procedure EnemieSpawnTimerExecute(Sender: TObject);
@@ -64,6 +66,7 @@ type
     procedure DrawPlayerScore();
     procedure DrawFrame();
     procedure DrawLvl();
+    procedure DrawAid();
   public
 
   end;
@@ -79,6 +82,14 @@ type
    constructor Create(posX, posY:integer; imgPath: string);
   end;
 
+  TAidKit = class
+  public
+   img:TBitmap;
+   x,y,heal:integer;
+   widht, height:integer;
+   constructor Create(posX, posY:integer);
+  end;
+
 var
   Game: TGame;
   player: TPlayer;
@@ -86,6 +97,7 @@ var
   iSwitchWay: boolean;
   score,prevScore,spawnEnemiesCount,lvl: integer;
   isWireGame : boolean;
+  aid:TAidKit;
 
 implementation
 
@@ -95,9 +107,9 @@ procedure TGame.FormKeyPress(Sender: TObject; var Key: char);
 var s : string;
 begin
   str(Ord(Key),s);
-   ShowMessage(s);
-   if key = #30 then MoveLeft;
-   if key = #32 then MoveRight;
+   //ShowMessage(s);
+   if key = #97 then MoveLeft;
+   if key = #100 then MoveRight;
 end;
 
 // создание пуль
@@ -132,15 +144,15 @@ end;
 procedure IncLvl();
 const STAGE = 100;
 begin
-  if lvl < 10 then
-  begin
-     if score-prevScore >= STAGE then
+   if score-prevScore >= STAGE then
+   begin
+     Inc(lvl);
+     prevScore := score;
+     if lvl < 10 then
      begin
-       prevScore := score;
-       spawnEnemiesCount := spawnEnemiesCount + 2;
+     spawnEnemiesCount := spawnEnemiesCount + 2;
      end;
-  end;
-  Inc(lvl);
+   end;
 end;
 
 // рандомная генерация противника
@@ -207,6 +219,20 @@ begin
   end;
 end;
 
+
+// генерация аптечки
+procedure TGame.aidSpawnTimer(Sender: TObject);
+begin
+  randomize;
+  aid:=nil;
+  if lvl > 1 then
+  begin
+    aid:=TAidKit.Create(random(MAX_X),0);
+    if lvl > 3 then aid.heal:=10;
+    if lvl > 5 then aid.heal:=20;
+  end;
+end;
+
 // генерация пуль противника
 procedure TGame.EnemieBulletTimerExecute(Sender: TObject);
 var i: integer;
@@ -245,6 +271,18 @@ begin
    widht := img.Width;
    isVisable := true;
    health := 100;
+end;
+
+//конструктор аптечки
+constructor TAidKit.Create(posX, posY:integer);
+begin
+   img := TBitmap.Create;
+   img.LoadFromFile('assets\heal.bmp');
+   x := posX;
+   y := posY;
+   height := img.Height;
+   widht := img.Width;
+   heal:=5;
 end;
 
 //  конструктор пули
@@ -431,6 +469,15 @@ begin
   Canvas.LineTo(MAX_X+100, MAX_Y - 10);
 end;
 
+//отрисовка аптечки
+procedure TGame.DrawAid();
+begin
+  if aid <> nil then
+  begin
+    Canvas.Draw(aid.x, aid.y, aid.img);
+  end;
+end;
+
 //общий вызов отрисовок
  procedure TGame.Frame();
  var
@@ -442,6 +489,7 @@ end;
     DrawLvl();
     DrawFrame();
     DrawEnemies();
+    DrawAid();
     DrawBullets();
     DrawEnemieBullets();
  end;
@@ -539,12 +587,32 @@ begin
   end;
 end;
 
+// механика аптечки
+procedure DropAid();
+const STEP = 4;
+begin
+  if aid <> nil then
+  begin
+    aid.y:=aid.y+STEP;
+
+    if (aid.y < player.y+player.height)
+      and (aid.y > player.y) and
+      (aid.x > player.x-aid.widht) and
+      (aid.x < player.x+player.widht+20)
+      and(player.hp<100)
+    then begin
+      player.hp:=player.hp+aid.heal;
+      aid:=nil;
+    end;
+  end;
+end;
+
 // различные обновления
 procedure TGame.UpdateGame();
 begin
-  // стрельба игрока
   PlayerShoot();
   EnemieShoot();
+  DropAid();
 end;
 
 end.

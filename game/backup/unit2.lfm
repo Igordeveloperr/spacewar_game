@@ -1,64 +1,64 @@
 object WireGame: TWireGame
-  Left = 141
-  Height = 480
-  Top = 232
+  Left = 491
+  Height = 552
+  Top = 214
   Width = 608
   Caption = 'WireGame'
-  ClientHeight = 0
-  ClientWidth = 0
+  ClientHeight = 552
+  ClientWidth = 608
   Color = clBlack
   OnCreate = FormCreate
   OnShow = FormShow
   LCLVersion = '2.2.6.0'
   object BitBtn1: TBitBtn
-    Left = 104
+    Left = 120
     Height = 30
-    Top = 128
+    Top = 200
     Width = 91
     Caption = 'BitBtn1'
     OnClick = BitBtn1Click
     TabOrder = 0
   end
   object BitBtn2: TBitBtn
-    Left = 104
+    Left = 120
     Height = 30
-    Top = 192
+    Top = 264
     Width = 91
     Caption = 'BitBtn2'
     OnClick = BitBtn2Click
     TabOrder = 1
   end
   object BitBtn3: TBitBtn
-    Left = 104
+    Left = 120
     Height = 30
-    Top = 264
+    Top = 336
     Width = 91
     Caption = 'BitBtn3'
     OnClick = BitBtn3Click
     TabOrder = 2
   end
   object BitBtn4: TBitBtn
-    Left = 393
+    Left = 409
     Height = 30
-    Top = 128
+    Top = 200
     Width = 95
     Caption = 'BitBtn4'
     OnClick = BitBtn4Click
     TabOrder = 3
   end
   object BitBtn5: TBitBtn
-    Left = 393
+    Left = 409
     Height = 30
-    Top = 192
+    Top = 264
     Width = 95
     Caption = 'BitBtn5'
     OnClick = BitBtn5Click
     TabOrder = 4
   end
   object BitBtn6: TBitBtn
-    Left = 393
+    Left = 409
     Height = 30
-    Top = 264
+    Top = 336
     Width = 95
     Caption = 'BitBtn6'
     OnClick = BitBtn6Click
@@ -81,9 +81,9 @@ object WireGame: TWireGame
     ParentFont = False
   end
   object respawnBtn: TButton
-    Left = 184
+    Left = 200
     Height = 72
-    Top = 352
+    Top = 424
     Width = 192
     Caption = 'Возродиться'
     Font.CharSet = RUSSIAN_CHARSET
@@ -95,5 +95,41 @@ object WireGame: TWireGame
     OnClick = respawnBtnClick
     ParentFont = False
     TabOrder = 6
+  end
+  object Label2: TLabel
+    Left = 259
+    Height = 17
+    Top = 151
+    Width = 38
+    Caption = 'Label2'
+    ParentColor = False
+  end
+  object LTime: TLabel
+    Left = 288
+    Height = 32
+    Top = 128
+    Width = 73
+    Caption = '10 сек'
+    Color = clBlack
+    Font.CharSet = RUSSIAN_CHARSET
+    Font.Color = clWhite
+    Font.Height = -24
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    Font.Style = [fsBold, fsItalic]
+    ParentColor = False
+    ParentFont = False
+    Transparent = False
+  end
+  object Timer1: TTimer
+    Interval = 10000
+    OnTimer = Timer1Timer
+    Left = 88
+    Top = 453
+  end
+  object Timer2: TTimer
+    OnTimer = Timer2Timer
+    Left = 58
+    Top = 420
   end
 end

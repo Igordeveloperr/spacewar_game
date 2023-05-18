@@ -1,8 +1,8 @@
 object Game: TGame
-  Left = 115
-  Height = 688
-  Top = 202
-  Width = 951
+  Left = 337
+  Height = 741
+  Top = 228
+  Width = 1000
   Caption = 'Game'
   Color = clBlack
   OnCreate = FormCreate
@@ -39,5 +39,11 @@ object Game: TGame
     Interval = 10
     Left = 52
     Top = 390
+  end
+  object aidSpawn: TTimer
+    Interval = 10000
+    OnTimer = aidSpawnTimer
+    Left = 32
+    Top = 472
   end
 end
