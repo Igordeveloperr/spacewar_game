@@ -5,8 +5,8 @@ unit Unit1;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
-  unit2;
+  Classes, SysUtils, SQLDB, SQLite3Conn, Forms, Controls, Graphics, Dialogs,
+  ExtCtrls, StdCtrls, unit2;
 
 const BULLET_STEP = 15;
 const STEP = 7;
@@ -71,6 +71,9 @@ type
     Label3: TLabel;
     DmgLbl: TLabel;
     SCLbl: TLabel;
+    SQLConnector: TSQLConnector;
+    SQLQuery: TSQLQuery;
+    SQLTransaction: TSQLTransaction;
     Timer1: TTimer;
     EnemieSpawnTimer: TTimer;
     BotMoveTimer: TTimer;
@@ -107,6 +110,8 @@ type
     procedure IncLvl();
     procedure EnemieShoot();
     procedure DrawRecordScore();
+    procedure GetScoreRecordFromDb();
+    procedure UpdateScoreRecordInDb();
   public
 
   end;
@@ -128,7 +133,7 @@ var
   enemie_bullets,enemies,bullets,bonuses: TList;
   iSwitchWay: boolean;
   score,prevScore,spawnEnemiesCount,lvl: integer;
-  recordScore:integer;
+  recordScore:longint;
   isWireGame : boolean;
   aid:TAidKit;
   dmgX2:TDmgX2;
@@ -159,8 +164,28 @@ begin
   ));
 end;
 
+procedure TGame.GetScoreRecordFromDb();
+begin
+  SQLConnector.Open;
+  SQLTransaction.Active:=true;
+
+  SQLQuery.SQL.Text:='SELECT `score_rec` FROM `users` WHERE `id`=1';
+  SQLQuery.Open;
+  SQLQuery.First;
+  recordScore:=SQLQuery.Fields[0].AsInteger;
+  SQLQuery.Close;
+  SQLTransaction.Active:=false;
+  SQLConnector.Close();
+end;
+
 // запрет на изменение размеров формы
 procedure TGame.FormCreate(Sender: TObject);
+type
+  TUser = record
+   name:string;
+   score_rec:integer;
+  end;
+var user:TUser;
 begin
   Game.BorderStyle:=bsDialog;
   isWireGame:=false;
@@ -173,6 +198,10 @@ begin
     MaxWidth:= Width;
     MinWidth:= Width;
   end;
+  SQLConnector.DatabaseName:='C:\Users\Гохля\Desktop\programming\pasral\laharuz\lazarus\game\game_db.db';
+  SQLConnector.CharSet:='UTF8';
+  SQLConnector.Transaction := SQLTransaction;
+  GetScoreRecordFromDb();
 end;
 
 // увеличение уровня сложности
@@ -711,6 +740,22 @@ begin
   end;
 end;
 
+procedure TGame.UpdateScoreRecordInDb();
+var score_rec:string;
+begin
+  str(recordScore,score_rec);
+
+  SQLConnector.Open;
+  SQLTransaction.Active:=true;
+
+  SQLQuery.SQL.Text:='UPDATE `users` SET `score_rec`='+score_rec+' WHERE `id`=1';
+  SQLQuery.ExecSQL;
+  SQLTransaction.Commit;
+  SQLQuery.Close;
+  SQLTransaction.Active:=false;
+  SQLConnector.Close();
+end;
+
 // механика стрельбы противника
 procedure TGame.EnemieShoot();
 const DAMAGE = 20;
@@ -745,6 +790,7 @@ begin
          player.score:=10;
          DmgLbl.Font.Color:=clSilver;
          SCLbl.Font.Color:=clSilver;
+         UpdateScoreRecordInDb();
          WireGame.Show;
          isWireGame := true;
          break;

@@ -1,7 +1,7 @@
 object Game: TGame
   Left = 390
   Height = 741
-  Top = 156
+  Top = 173
   Width = 1000
   Caption = 'Game'
   ClientHeight = 741
@@ -124,5 +124,28 @@ object Game: TGame
     OnTimer = BonusSpawnTimer
     Left = 32
     Top = 472
+  end
+  object SQLConnector: TSQLConnector
+    Connected = False
+    LoginPrompt = False
+    KeepConnection = False
+    ConnectorType = 'SQLite3'
+    Left = 65
+    Top = 580
+  end
+  object SQLTransaction: TSQLTransaction
+    Active = False
+    Database = SQLConnector
+    Left = 80
+    Top = 656
+  end
+  object SQLQuery: TSQLQuery
+    FieldDefs = <>
+    Database = SQLConnector
+    Transaction = SQLTransaction
+    Params = <>
+    Macros = <>
+    Left = 37
+    Top = 631
   end
 end
