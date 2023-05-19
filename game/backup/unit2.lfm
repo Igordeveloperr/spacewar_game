@@ -1,11 +1,11 @@
 object WireGame: TWireGame
-  Left = 491
+  Left = 231
   Height = 552
-  Top = 214
+  Top = 283
   Width = 608
   Caption = 'WireGame'
-  ClientHeight = 552
-  ClientWidth = 608
+  ClientHeight = 0
+  ClientWidth = 0
   Color = clBlack
   OnCreate = FormCreate
   OnShow = FormShow

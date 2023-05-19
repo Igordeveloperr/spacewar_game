@@ -1,7 +1,7 @@
 object WireGame: TWireGame
-  Left = 417
+  Left = 361
   Height = 552
-  Top = 245
+  Top = 121
   Width = 608
   Caption = 'WireGame'
   ClientHeight = 0

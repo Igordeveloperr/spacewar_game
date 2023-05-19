@@ -5,7 +5,8 @@ unit Unit1;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls,unit2;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
+  unit2;
 
 const BULLET_STEP = 15;
 const STEP = 7;
@@ -19,7 +20,7 @@ type
   TPlayer = record
    img:TBitmap;
    imgSrc:string;
-   x,y,hp: integer;
+   x,y,hp,dmg,score: integer;
    widht, height:integer;
   end;
 
@@ -33,16 +34,50 @@ type
    constructor Create(posX,posY,wid:integer; isEnemie:boolean);
   end;
 
+  // родительский класс
+  TBonus = class
+   public
+     img:TBitmap;
+     x,y,reward:integer;
+     widht, height:integer;
+     bonusType:string;
+     isVisable: boolean;
+     constructor Create(posX, posY,rew:integer;path,tBonus:string);
+  end;
+  // наследники
+  TAidKit = class(TBonus)
+  public
+   heal:integer;
+   constructor Create(posX, posY:integer);
+  end;
+
+  TScoreX2 = class(TBonus)
+  public
+   factor:integer;
+   constructor Create(posX, posY:integer);
+  end;
+
+  TDmgX2 = class(TBonus)
+  public
+   factor:integer;
+   constructor Create(posX, posY:integer);
+  end;
+
   { TGame }
 
   TGame = class(TForm)
+    Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    DmgLbl: TLabel;
+    SCLbl: TLabel;
     Timer1: TTimer;
     EnemieSpawnTimer: TTimer;
     BotMoveTimer: TTimer;
     EnemieBulletTimer: TTimer;
     ResTimer: TTimer;
     aidSpawn: TTimer;
-    procedure aidSpawnTimer(Sender: TObject);
+    procedure BonusSpawnTimer(Sender: TObject);
     procedure BotMoveTimerExecute(Sender: TObject);
     procedure EnemieBulletTimerExecute(Sender: TObject);
     procedure EnemieSpawnTimerExecute(Sender: TObject);
@@ -66,7 +101,12 @@ type
     procedure DrawPlayerScore();
     procedure DrawFrame();
     procedure DrawLvl();
-    procedure DrawAid();
+    procedure DrawBonuses();
+    procedure DropBonuses();
+    procedure SelectBonus(bonus:TBonus);
+    procedure IncLvl();
+    procedure EnemieShoot();
+    procedure DrawRecordScore();
   public
 
   end;
@@ -82,22 +122,17 @@ type
    constructor Create(posX, posY:integer; imgPath: string);
   end;
 
-  TAidKit = class
-  public
-   img:TBitmap;
-   x,y,heal:integer;
-   widht, height:integer;
-   constructor Create(posX, posY:integer);
-  end;
-
 var
   Game: TGame;
   player: TPlayer;
-  enemie_bullets,enemies,bullets: TList;
+  enemie_bullets,enemies,bullets,bonuses: TList;
   iSwitchWay: boolean;
   score,prevScore,spawnEnemiesCount,lvl: integer;
+  recordScore:integer;
   isWireGame : boolean;
   aid:TAidKit;
+  dmgX2:TDmgX2;
+  scoreX2:TScoreX2;
 
 implementation
 
@@ -141,13 +176,19 @@ begin
 end;
 
 // увеличение уровня сложности
-procedure IncLvl();
+procedure TGame.IncLvl();
 const STAGE = 100;
 begin
    if score-prevScore >= STAGE then
    begin
      Inc(lvl);
      prevScore := score;
+
+     player.dmg:=25;
+     player.score:=10;
+     DmgLbl.Font.Color:=clSilver;
+     SCLbl.Font.Color:=clSilver;
+
      if lvl < 10 then
      begin
      spawnEnemiesCount := spawnEnemiesCount + 2;
@@ -220,16 +261,80 @@ begin
 end;
 
 
-// генерация аптечки
-procedure TGame.aidSpawnTimer(Sender: TObject);
+// генерация бонусов
+procedure TGame.BonusSpawnTimer(Sender: TObject);
+var
+  bonus:TBonus;
+  i:integer;
 begin
   randomize;
-  aid:=nil;
   if lvl > 1 then
   begin
-    aid:=TAidKit.Create(random(MAX_X),0);
-    if lvl >= 3 then aid.heal:=10;
-    if lvl >= 5 then aid.heal:=20;
+    i := random(bonuses.Count);
+    bonus := TBonus(bonuses[i]);
+    bonus.x := random(MAX_X);
+    bonus.y := 0;
+    bonus.isVisable:=true;
+  end;
+  if lvl >= 4 then
+  begin
+    i := random(bonuses.Count);
+    bonus := TBonus(bonuses[i]);
+    bonus.x := random(MAX_X);
+    bonus.y := 0;
+    bonus.isVisable:=true;
+
+    i := random(bonuses.Count);
+    bonus := TBonus(bonuses[i]);
+    bonus.x := random(MAX_X);
+    bonus.y := 0;
+    bonus.isVisable:=true;
+  end;
+  if lvl >= 6 then
+  begin
+    i := random(bonuses.Count);
+    bonus := TBonus(bonuses[i]);
+    bonus.x := random(MAX_X);
+    bonus.y := 0;
+    bonus.isVisable:=true;
+
+    i := random(bonuses.Count);
+    bonus := TBonus(bonuses[i]);
+    bonus.x := random(MAX_X);
+    bonus.y := 0;
+    bonus.isVisable:=true;
+
+    i := random(bonuses.Count);
+    bonus := TBonus(bonuses[i]);
+    bonus.x := random(MAX_X);
+    bonus.y := 0;
+    bonus.isVisable:=true;
+  end;
+  if lvl >= 8 then
+  begin
+    i := random(bonuses.Count);
+    bonus := TBonus(bonuses[i]);
+    bonus.x := random(MAX_X);
+    bonus.y := 0;
+    bonus.isVisable:=true;
+
+    i := random(bonuses.Count);
+    bonus := TBonus(bonuses[i]);
+    bonus.x := random(MAX_X);
+    bonus.y := 0;
+    bonus.isVisable:=true;
+
+    i := random(bonuses.Count);
+    bonus := TBonus(bonuses[i]);
+    bonus.x := random(MAX_X);
+    bonus.y := 0;
+    bonus.isVisable:=true;
+
+    i := random(bonuses.Count);
+    bonus := TBonus(bonuses[i]);
+    bonus.x := random(MAX_X);
+    bonus.y := 0;
+    bonus.isVisable:=true;
   end;
 end;
 
@@ -273,16 +378,37 @@ begin
    health := 100;
 end;
 
+constructor TBonus.Create(posX, posY,rew:integer;path,tBonus:string);
+begin
+  x := posX;
+  y := posY;
+  img := TBitmap.Create;
+  img.LoadFromFile(path);
+  height := img.Height;
+  widht := img.Width;
+  reward := rew;
+  isVisable:=false;
+  bonusType := tBonus;
+end;
+
+// конструкторы бонусов
+constructor TScoreX2.Create(posX, posY:integer);
+begin
+  factor := 2;
+  inherited Create(posX,posY,factor,'assets\x2.bmp','score');
+end;
+
+constructor TDmgX2.Create(posX, posY:integer);
+begin
+  factor := 2;
+  inherited Create(posX,posY,factor,'assets\dmg.bmp','dmg');
+end;
+
 //конструктор аптечки
 constructor TAidKit.Create(posX, posY:integer);
 begin
-   img := TBitmap.Create;
-   img.LoadFromFile('assets\heal.bmp');
-   x := posX;
-   y := posY;
-   height := img.Height;
-   widht := img.Width;
-   heal:=5;
+  heal:=20;
+  inherited Create(posX,posY,heal,'assets\heal.bmp','aid');
 end;
 
 //  конструктор пули
@@ -346,8 +472,15 @@ end;
 // загрузка игрока и врагов
  procedure TGame.LoadSource();
  begin
-   bullets := TList.Create;
+   bonuses := TList.Create;
+   aid := TAidKit.Create(-100,-100);
+   dmgX2:= TDmgX2.Create(-100,-100);
+   scoreX2:=TScoreX2.Create(-100,-100);
+   bonuses.Add(aid);
+   bonuses.Add(dmgX2);
+   bonuses.Add(scoreX2);
 
+   bullets := TList.Create;
    player.img := TBitmap.Create;
    player.imgSrc := 'assets\Player.bmp';
    player.img.LoadFromFile(player.imgSrc);
@@ -356,6 +489,8 @@ end;
    player.hp := 100;
    player.height := player.img.Height;
    player.widht := player.img.Width;
+   player.dmg := 25;
+   player.score:=10;
 
    enemie_bullets := TList.Create;
 
@@ -439,7 +574,7 @@ begin
   Canvas.TextOut(
     MAX_X - 100,
     MAX_Y + 30,
-    'Score - ' + outScore
+    'SCORE - ' + outScore
   );
 end;
 
@@ -458,6 +593,21 @@ begin
   );
 end;
 
+// отрисовка рекордных очков
+procedure TGame.DrawRecordScore();
+var outScore : string;
+begin
+  str(recordScore, outScore);
+  Canvas.Font.Color := clAqua;
+  Canvas.Font.Size := 14;
+  Canvas.Font.Style := [fsBold];
+  Canvas.TextOut(
+    MAX_X - 100,
+    MAX_Y + 90,
+    'RECORD - ' + outScore
+  );
+end;
+
 // отрисовка рамки
 procedure TGame.DrawFrame();
 begin
@@ -469,12 +619,20 @@ begin
   Canvas.LineTo(MAX_X+100, MAX_Y - 10);
 end;
 
-//отрисовка аптечки
-procedure TGame.DrawAid();
+//отрисовка бонусов
+procedure TGame.DrawBonuses();
+var i : integer;
 begin
-  if aid <> nil then
+  for i := 0 to bonuses.Count-1 do
   begin
-    Canvas.Draw(aid.x, aid.y, aid.img);
+    if TBonus(bonuses[i]).isVisable
+    then begin
+      Canvas.Draw(
+        TBonus(bonuses[i]).x,
+        TBonus(bonuses[i]).y,
+        TBonus(bonuses[i]).img
+      );
+    end;
   end;
 end;
 
@@ -487,16 +645,16 @@ end;
     DrawPlayerHp();
     DrawPlayerScore();
     DrawLvl();
+    DrawRecordScore();
     DrawFrame();
     DrawEnemies();
-    DrawAid();
+    DrawBonuses();
     DrawBullets();
     DrawEnemieBullets();
  end;
 
 // механика стрельбы игрока
 procedure PlayerShoot();
-const SCORES = 10;
 var i,j : integer;
 begin
   // анимация полета пуль
@@ -517,11 +675,15 @@ begin
       (TBullet(bullets[i]).isVisable)
       then
       begin
-        TBot(enemies[j]).health := TBot(enemies[j]).health - 25;
+        TBot(enemies[j]).health := TBot(enemies[j]).health - player.dmg;
         TBullet(bullets[i]).isVisable := false;
         // уничтожение бота
         if TBot(enemies[j]).health <= 0 then begin
-          score := score  + SCORES;
+          score := score  + player.score;
+          if score > recordScore then
+          begin
+            recordScore:=score;
+          end;
           enemies.Remove(TBot(enemies[j]));
           break;
         end;
@@ -550,7 +712,7 @@ begin
 end;
 
 // механика стрельбы противника
-procedure EnemieShoot();
+procedure TGame.EnemieShoot();
 const DAMAGE = 20;
 var i,j : integer;
 begin
@@ -579,6 +741,10 @@ begin
        player.hp := player.hp - DAMAGE;
        // возрождение короч
        if player.hp <= 0 then begin
+         player.dmg:=25;
+         player.score:=10;
+         DmgLbl.Font.Color:=clSilver;
+         SCLbl.Font.Color:=clSilver;
          WireGame.Show;
          isWireGame := true;
          break;
@@ -587,22 +753,46 @@ begin
   end;
 end;
 
-// механика аптечки
-procedure DropAid();
-const STEP = 4;
+// выбор бонуса
+procedure TGame.SelectBonus(bonus:TBonus);
 begin
-  if aid <> nil then
-  begin
-    aid.y:=aid.y+STEP;
+  if (bonus.bonusType = 'aid')and(player.hp < 100)
+  then begin
+    player.hp:=player.hp+bonus.reward;
+  end;
+  if (bonus.bonusType = 'dmg')and(player.dmg <= 25)
+  then begin
+    DmgLbl.Font.Color:=clPurple;
+    player.dmg:=player.dmg*bonus.reward;
+  end;
+  if (bonus.bonusType = 'score')and(player.score < 20)
+  then begin
+    SCLbl.Font.Color:=clYellow;
+    player.score:=player.score*bonus.reward;
+  end;
+  bonus.isVisable:=false;
+end;
 
-    if (aid.y < player.y+player.height)
-      and (aid.y > player.y) and
-      (aid.x > player.x-aid.widht) and
-      (aid.x < player.x+player.widht+20)
-      and(player.hp<100)
-    then begin
-      player.hp:=player.hp+aid.heal;
-      aid:=nil;
+// механика бонусов
+procedure TGame.DropBonuses();
+const STEP = 4;
+var
+  i:integer;
+  bonus:TBonus;
+begin
+  for i:=0 to bonuses.Count-1 do
+  begin
+    bonus := TBonus(bonuses[i]);
+    if bonus.isVisable then
+    begin
+      bonus.y:=bonus.y+STEP;
+      if (bonus.y < player.y+player.height)
+      and (bonus.y > player.y) and
+      (bonus.x > player.x-bonus.widht) and
+      (bonus.x < player.x+player.widht+20)
+      then begin
+         SelectBonus(bonus);
+      end;
     end;
   end;
 end;
@@ -612,7 +802,7 @@ procedure TGame.UpdateGame();
 begin
   PlayerShoot();
   EnemieShoot();
-  DropAid();
+  DropBonuses();
 end;
 
 end.

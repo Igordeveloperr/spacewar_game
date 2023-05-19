@@ -1,9 +1,11 @@
 object Game: TGame
-  Left = 337
+  Left = 390
   Height = 741
-  Top = 228
+  Top = 156
   Width = 1000
   Caption = 'Game'
+  ClientHeight = 741
+  ClientWidth = 1000
   Color = clBlack
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
@@ -11,16 +13,93 @@ object Game: TGame
   OnPaint = FormPaint
   OnShow = FormShow
   LCLVersion = '2.2.6.0'
+  object Label1: TLabel
+    Left = 432
+    Height = 32
+    Top = 616
+    Width = 103
+    Caption = 'БОНУСЫ'
+    Color = clBlack
+    Font.CharSet = RUSSIAN_CHARSET
+    Font.Color = clWhite
+    Font.Height = -24
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    Font.Style = [fsBold, fsItalic]
+    ParentColor = False
+    ParentFont = False
+    Transparent = False
+  end
+  object Label2: TLabel
+    Left = 392
+    Height = 30
+    Top = 656
+    Width = 64
+    Caption = 'Score :'
+    Font.CharSet = RUSSIAN_CHARSET
+    Font.Color = clWhite
+    Font.Height = -21
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    Font.Style = [fsBold, fsItalic]
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label3: TLabel
+    Left = 504
+    Height = 30
+    Top = 656
+    Width = 59
+    Caption = 'Dmg :'
+    Font.CharSet = RUSSIAN_CHARSET
+    Font.Color = clWhite
+    Font.Height = -21
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    Font.Style = [fsBold, fsItalic]
+    ParentColor = False
+    ParentFont = False
+  end
+  object SCLbl: TLabel
+    Left = 464
+    Height = 30
+    Top = 656
+    Width = 26
+    Caption = 'X2'
+    Font.CharSet = RUSSIAN_CHARSET
+    Font.Color = clSilver
+    Font.Height = -21
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    Font.Style = [fsBold, fsItalic]
+    ParentColor = False
+    ParentFont = False
+  end
+  object DmgLbl: TLabel
+    Left = 568
+    Height = 30
+    Top = 656
+    Width = 26
+    Caption = 'X2'
+    Font.CharSet = RUSSIAN_CHARSET
+    Font.Color = clSilver
+    Font.Height = -21
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    Font.Style = [fsBold, fsItalic]
+    ParentColor = False
+    ParentFont = False
+  end
   object Timer1: TTimer
     Interval = 10
     OnTimer = Timer1Timer
-    Left = 26
+    Left = 35
     Top = 40
   end
   object EnemieSpawnTimer: TTimer
     Interval = 10
     OnTimer = EnemieSpawnTimerExecute
-    Left = 24
+    Left = 35
     Top = 106
   end
   object BotMoveTimer: TTimer
@@ -37,12 +116,12 @@ object Game: TGame
   end
   object ResTimer: TTimer
     Interval = 10
-    Left = 52
-    Top = 390
+    Left = 32
+    Top = 376
   end
   object aidSpawn: TTimer
     Interval = 10000
-    OnTimer = aidSpawnTimer
+    OnTimer = BonusSpawnTimer
     Left = 32
     Top = 472
   end
